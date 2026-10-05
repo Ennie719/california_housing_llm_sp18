@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+models/
+models/expirement_models_joblib/*.joblib
+models/model_metadata.json
+mlruns/*

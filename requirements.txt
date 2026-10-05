@@ -1,0 +1,11 @@
+mlflow==3.13.0
+evidently==0.4.25
+cloudpickle==3.1.2
+numpy==1.26.4
+pandas==2.3.3
+psutil==7.2.2
+pyarrow==24.0.0
+scikit-learn==1.7.2
+scipy==1.11.1
+pytest==7.4.0
+streamlit==1.64.0

@@ -1,0 +1,60 @@
+# A configs/ directory with at least one YAML configuration file that defines your training hyperparameters, 
+# file paths, and any other settings. Your training script must read from this config file rather than using 
+# hardcoded values
+# The `configs/cali_house.yaml` file contains the hyperparameters for training a Random Forest model on the
+#  California housing dataset. The parameters specified in this configuration file are:
+# The file paths for the training and validation datasets, as well as the hyperparameters for the Random Forest model
+# MLproject
+
+name: California_Housing_Prediction
+data: 
+  as_frame: True
+  path: data/raw/housing_raw_data.csv
+  version: "1.0"
+
+Model_type: "RandomForestRegressor"
+test_size: 0.25
+random_state: 42
+
+model: 
+  type: random_forest
+  n_estimators: 500
+  max_depth: 20
+  min_samples_split: 5
+
+experiments:
+  - name: Trial_1
+    test_size: 0.25
+    random_state: 42
+    model:
+      n_estimators: 200
+      max_depth: 20
+      min_samples_split: 5
+  - name: Trial_2
+    test_size: 0.25
+    random_state: 42
+    model:
+      n_estimators: 500
+      max_depth: 1
+      min_samples_split: 8
+  - name: Trial_3
+    test_size: 0.25
+    random_state: 42
+    model:
+      n_estimators: 200
+      max_depth: 10
+      min_samples_split: 5
+  - name: Trial_4
+    test_size: 0.25
+    random_state: 42
+    model:
+      n_estimators: 100
+      max_depth: 10
+      min_samples_split: 20
+  - name: Trial_5
+    test_size: 0.25
+    random_state: 42
+    model:
+      n_estimators: 300
+      max_depth: 50
+      min_samples_split: 20

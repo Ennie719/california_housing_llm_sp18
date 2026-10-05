@@ -1,13 +1,21 @@
 print("=== SERVER STARTING ===")
 import json
+import sys
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
-from .schemas import (
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.api.schemas import (
     HousePredictionRequest,
     PredictionResponse,
     ModelInfoResponse,
     HealthCheckResponse
 )
-from .api import (
+from src.api.api import (
     load_model_and_metadata,
     make_prediction,
     get_model_info,
@@ -76,25 +84,14 @@ async def model_info():
         # Include the error message in the detail
         raise HTTPException(status_code=503, detail="Service Unavailable")  # Replace with proper error handling
 
-# YOUR TASK: Implement the prediction endpoint
-# This endpoint should:
-# 1. Convert the Pydantic model to a dictionary
-# 2. Call make_prediction() from api.py
-# 3. Get model version from metadata
-# 4. Return a PredictionResponse
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(request: HousePredictionRequest):
     print("Starting make_prediction ", request)
     print("Input data:", request)
 
     try:
-        # YOUR TASK: Convert request to dictionary
-        # Hint: Pydantic models have a .dict() method
         features_dict = request.dict() # Replace with request.dict()
-        # print("Features dict:", features_dict)
-
-        # YOUR TASK: Make prediction
-        # int = int(make_prediction('predicted_price'))
+       
         predicted_price = make_prediction(features_dict) # Replace with make_prediction() call
         # print(f"Type: {type(predicted_price)}")
         # print(f"Content: {predicted_price}")

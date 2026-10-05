@@ -13,12 +13,6 @@ from src.preprocess import load_config, load_data, splitting_data
 import json
 import os
 import joblib
-# with open("configs/config.yaml") as f:
-    # config = yaml.safe_load(f)
-# print(type(config))
-# print(config)
-# print(type(config["model"]))
-# print(config["model"])
     
 def model_training(df, config):
     """
@@ -38,14 +32,6 @@ def model_training(df, config):
     rf_fit = rf.fit(x_train, y_train)
     return rf_fit
 
-# if __name__ == "__main__":
-#     df = load_data()
-
-#     with open("configs/config.yaml") as f:
-#         config = yaml.safe_load(f)
-#     # config =  "../configs/config.yaml"
-#     check_train = model_training(df, config)
-#     print(check_train)
 def feature_importance(rf, feature_names):
     """
     Calculate feature importance from the fitted Random Forest model.
@@ -64,18 +50,14 @@ def feature_importance(rf, feature_names):
     }).sort_values('importance', ascending=False)
 
     return importance_df
-if __name__ == "__main__":
-     with open("configs/config.yaml") as f:
-        config = yaml.safe_load(f)
-        df = load_data()
-        rf = model_training(df, config)
-        print(feature_importance(rf, df.columns))
-    
 
 def trial_experiment():
     config = load_config("configs/config.yaml")
     df = load_data()
     x_train, x_test, y_train, y_test = splitting_data(df)
+    best_mse = float("inf")
+    model_dir = Path("models/expirement_models_joblib")
+    model_dir.mkdir(parents=True, exist_ok=True)
 
     mlflow.set_experiment("California Housing")
     for exp in config["experiments"]:
@@ -94,6 +76,9 @@ def trial_experiment():
             mlflow.sklearn.log_model(model, "model")
             print(f"{exp['name']}: MSE={mse:.4f}, R2={r2:.4f}, predictions ={predictions} ")
             joblib.dump(model, f"models/expirement_models_joblib/model_{exp['name']}.joblib" )
+            if mse < best_mse:
+                best_mse = mse
+                joblib.dump(model, model_dir / "best_model.joblib")
             joblib.dump(predictions, f"models/expirement_models_joblib/predictions_{exp['name']}.joblib",  )
             joblib.dump(mse, f"models/expirement_models_joblib/mse_{exp['name']}.joblib")
             joblib.dump(r2, f"models/expirement_models_joblib/r2_{exp['name']}.joblib")
@@ -124,3 +109,10 @@ def main():
     with open("metrics/results.json", "w") as f:
         json.dump(stats, f)
 
+
+if __name__ == "__main__":
+    #  with open("configs/config.yaml") as f:
+        # config = yaml.safe_load(f)
+        # df = load_data()
+        # rf = model_training(df, config)
+    trial_experiment()

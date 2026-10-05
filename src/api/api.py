@@ -1,8 +1,8 @@
 import joblib
 import numpy as np
 import json
+import pandas as pd
 from typing import Dict, Any
-import os
 from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -17,9 +17,23 @@ def load_model_and_metadata():
     global model, metadata
 
     try:
-        model = joblib.load("models/expirement_models_joblib/model_Trial_1.joblib")
-        with open('models/model_metadata.json', 'r') as f:
+        project_root = Path(__file__).resolve().parents[2]
+        model = joblib.load(
+            project_root / "models/expirement_models_joblib/best_model.joblib"
+        )
+        if not callable(getattr(model, "predict", None)):
+            raise ValueError("Saved model artifact does not contain a predictor")
+        if getattr(model, "n_outputs_", None) != 1:
+            raise ValueError(
+                "Saved model must be a single-output regressor; retrain and replace it."
+            )
+
+        with (project_root / "models/model_metadata.json").open("r") as f:
             metadata = json.load(f) # Replace this with json.load(...)
+        if set(metadata["features"]) != set(model.feature_names_in_):
+            raise ValueError(
+                "Model metadata features do not match the saved model features."
+            )
 
         print("Model and metadata loaded successfully!")
         return True
@@ -29,23 +43,15 @@ def load_model_and_metadata():
         return False
 load_model_and_metadata()
 
-# def make_prediction(house_features: Dict[str, Any]) -> float:
-#     global model
-   
-#     if model is None:
-#         raise ValueError("Model not loaded")
-#     feature_values = [house_features[feature_name] for feature_name in metadata['features']]
-#     X = np.array([feature_values]).reshape(1,-1)  # Replace with np.array() conversion
-#     prediction = model.predict(X)[0]  # Replace with actual prediction
-#     return round(float(prediction), 2)
-
 def make_prediction(data: Dict[str, Any]) -> float:
     global model
    
-    if model is None:
+    if model is None or metadata is None:
         raise ValueError("Model not loaded")
-    feature_values = [data[feature_name] for feature_name in metadata['features']]
-    X = np.array(feature_values).reshape(1,-1)  # Replace with np.array() conversion
+    feature_values = {
+        feature_name: data[feature_name] for feature_name in model.feature_names_in_
+    }
+    X = pd.DataFrame([feature_values])
     # prediction = model.predict(X)[0]  # Replace with actual prediction
     raw = np.asarray(model.predict(X))
     if raw.size != 1:

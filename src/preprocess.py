@@ -16,7 +16,7 @@ def load_config(path):
         return yaml.safe_load(config_file)
 
 def load_data(target=None):
-    """Return features or a target Series from the California housing data."""
+    """Return features, or the requested target column, from the dataset."""
     config = load_config("configs/config.yaml")
 
     df = fetch_california_housing(
@@ -29,7 +29,7 @@ def load_data(target=None):
     if target not in df.columns:
         raise ValueError(f"Column '{target}' not found in the dataset.")
 
-    return df
+    return df[target]
 
     # df = load_data()
 def check_missing_values(df):
@@ -66,19 +66,23 @@ def splitting_data(df, test_size=None, random_state=None):
         test_size = config["test_size"]
     if random_state is None:
         random_state = config["random_state"]
-    # print(df)
-    features = load_data()
-    target = load_data("MedHouseVal")['MedHouseVal']
+    target_column = "MedHouseVal"
+    if target_column in df.columns:
+        features = df.drop(columns=target_column)
+        target = df[target_column]
+    else:
+        features = df
+        target = load_data(target_column)
+        if not features.index.equals(target.index):
+            raise ValueError(
+                "Feature rows must align with the California housing target."
+            )
+
     x_train, x_test, y_train, y_test = train_test_split(
         features, target, test_size=test_size, random_state=random_state
     )
 
     return x_train, x_test, y_train, y_test
-if __name__ == "__main__":
-
-    df = load_data()
-    df_split = splitting_data(df)
-    print(type(df_split))
 def scale_features(x_train, x_test):
     """
     Scale the features using StandardScaler.
@@ -102,24 +106,20 @@ def feature_target_corr(df):
     if df is None:
         raise ValueError("DataFrame is None. Please provide a valid DataFrame.")
 
-    # target_column = "MedHouseVal"
-    # if target_column in df.columns:
-    #     target = df[target_column]
-    #     features = df.drop(columns=target_column)
-    # else:
-    #     target = load_data(target_column)
-    #     features = df
-    #     if not features.index.equals(target.index):
-    #         raise ValueError(
-    #             "Feature rows must align with the California housing target."
-    #         )
-    target = load_data("MedHouseVal")['MedHouseVal']
-    features = load_data()
+    target_column = "MedHouseVal"
+    if target_column in df.columns:
+        target = df[target_column]
+        features = df.drop(columns=target_column)
+    else:
+        target = load_data(target_column)
+        features = df
+        if not features.index.equals(target.index):
+            raise ValueError(
+                "Feature rows must align with the California housing target."
+            )
+
     correlations = features.corrwith(target)
     return correlations[correlations > 0.1].sort_values(ascending=False)
 if __name__ == "__main__":
-    df = load_data("MedHouseVal")
-    df_split = feature_target_corr(df)
-    x_train, x_test, y_train, y_test = splitting_data(df)
-    df_corr = feature_target_corr(df)
-    print(splitting_data(df))
+    split = splitting_data(load_data())
+    print(split)

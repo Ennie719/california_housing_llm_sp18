@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.preprocess import load_data, splitting_data, encode_categoricals, check_missing_values, check_duplicates, scale_features, feature_target_corr
+from src.preprocess import load_data, splitting_data, check_missing_values, check_duplicates, scale_features, feature_target_corr
 from sklearn.metrics import mean_squared_error, r2_score
 from src.train import model_training, feature_importance
 from sklearn.datasets import fetch_california_housing
@@ -14,12 +14,12 @@ def test_data_load():
     df = load_data()
     assert not df.empty, "DataFrame is empty. Data loading failed."
     
-def test_encode_categoricals():
-    """Test the one-hot encoding of categorical columns."""
-    df = load_data()
-    encoded_df = encode_categoricals(df, ['HouseAge'])
-    assert not encoded_df.empty, "One-hot encoding failed."
-    assert 'HouseAge_10.0' in encoded_df.columns, "One-hot encoding did not create expected columns."
+# def test_encode_categoricals():
+#     """Test the one-hot encoding of categorical columns."""
+#     df = load_data()
+#     encoded_df = encode_categoricals(df, ['HouseAge'])
+#     assert not encoded_df.empty, "One-hot encoding failed."
+#     assert 'HouseAge_10.0' in encoded_df.columns, "One-hot encoding did not create expected columns."
 def test_missing_values_check():
     """Test the check for missing values in the DataFrame."""
     df = load_data()

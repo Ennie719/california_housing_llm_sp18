@@ -52,6 +52,8 @@ def make_prediction(data: Dict[str, Any]) -> float:
         feature_name: data[feature_name] for feature_name in model.feature_names_in_
     }
     X = pd.DataFrame([feature_values])
+    print(X)
+
     # prediction = model.predict(X)[0]  # Replace with actual prediction
     raw = np.asarray(model.predict(X))
     if raw.size != 1:

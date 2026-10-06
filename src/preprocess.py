@@ -121,5 +121,5 @@ def feature_target_corr(df):
     correlations = features.corrwith(target)
     return correlations[correlations > 0.1].sort_values(ascending=False)
 if __name__ == "__main__":
-    split = splitting_data(load_data())
-    print(split)
+    split = load_data()
+    print(split.head(10))
